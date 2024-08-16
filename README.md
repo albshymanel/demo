@@ -3,8 +3,8 @@
 Follow these steps to quickly get started with the project.
 
 ```bash
-git clone https://github.com/yourusername/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/albshymanel/demo.git
+cd demo
 ```
 
 ```bash
