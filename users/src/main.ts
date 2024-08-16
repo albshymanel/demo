@@ -21,10 +21,10 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Ticher docs')
-    .setDescription('The ticher app API description')
+    .setTitle('docs')
+    .setDescription('app API description')
     .setVersion('1.0')
-    .addTag('ticher')
+    .addTag('demo')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
