@@ -1,0 +1,87 @@
+version: "3.5"
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: demo
+    ports:
+      - "27017:27017"
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongo
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: root
+      ME_CONFIG_BASICAUTH: null
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: "27017"
+
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    hostname: rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root
+    ports:
+      - 15672:15672
+      - 5672:5672
+
+  users:
+    build: ./users
+    container_name: demo-users
+    ports:
+      - "3000:3000"
+    command: npm run start:prod
+    depends_on:
+      - mongo
+      - rabbitmq
+    environment:
+      PORT: 3000
+      RABBIT_USERNAME: root
+      RABBIT_PASSWORD: root
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_PROTOCOL: "amqp"
+      MONGO_HOST: mongo
+      MONGO_PORT: 27017
+      MONGO_DB: demo
+      MONGO_USERNAME: root
+      MONGO_PASSWORD: root
+      LOGGER_SYMBOL: "#"
+
+    healthcheck:
+      test: curl --fail http://localhost:3000/ || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 3
+
+  notifications:
+    build: ./notifications
+    container_name: demo-notifications
+    ports:
+      - "4000:4000"
+    command: npm run start:prod
+    restart: on-failure
+    depends_on:
+      - rabbitmq
+    environment:
+      PORT: 4000
+      RABBIT_USERNAME: root
+      RABBIT_PASSWORD: root
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_PROTOCOL: "amqp"
+    healthcheck:
+      test: curl --fail http://localhost:4000/ || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 3
